@@ -10,7 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
     <style>
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; touch-action: manipulation; }
         body {
             background-color: #5ce1e6;
             background-image: url('Devworldbetabgland.png');
@@ -23,36 +23,20 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            padding: 20px;
-        }
-
-        .clouds-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url('Devworldclouds.png');
-            background-repeat: repeat-x;
-            background-size: contain;
-            opacity: 0.8;
-            pointer-events: none;
-            z-index: 1;
+            padding: 15px;
         }
 
         .studio-container {
-            position: relative;
-            z-index: 2;
             width: 100%;
-            max-width: 800px;
+            max-width: 900px;
             background: #ffffff;
             border: 4px solid #000000;
             border-radius: 20px;
             box-shadow: 0 8px 0px #000000;
-            padding: 20px;
+            padding: 15px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
         }
 
         .toolbar {
@@ -60,18 +44,18 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 3px solid #000;
-            padding-bottom: 12px;
+            padding-bottom: 10px;
             flex-wrap: wrap;
             gap: 10px;
         }
 
         .project-title-input {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 800;
             border: 2px solid #000;
             border-radius: 8px;
             padding: 6px 10px;
-            width: 250px;
+            width: 200px;
         }
 
         .status-badge {
@@ -85,15 +69,16 @@
 
         .btn-group {
             display: flex;
-            gap: 8px;
+            gap: 6px;
+            flex-wrap: wrap;
         }
 
         .btn-custom {
-            padding: 8px 14px;
+            padding: 8px 12px;
             border: 2px solid #000;
             border-radius: 8px;
             font-weight: 800;
-            font-size: 13px;
+            font-size: 12px;
             cursor: pointer;
             box-shadow: 2px 2px 0px #000;
             transition: transform 0.1s ease;
@@ -105,36 +90,73 @@
         }
 
         .btn-back { background: #e9ecef; }
+        .btn-play { background: #ff0055; color: #fff; }
         .btn-save { background: #48cae4; }
         .btn-publish { background: #38b000; color: #fff; }
 
         .workspace {
             display: flex;
             gap: 15px;
-            min-height: 350px;
+            flex-direction: column;
         }
 
-        .canvas-area {
-            flex: 2;
-            background: #f8f9fa;
-            border: 3px dashed #000;
-            border-radius: 12px;
+        @media (min-width: 768px) {
+            .workspace { flex-direction: row; }
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            display: inline-block;
+            align-self: center;
+        }
+
+        canvas {
+            border: 4px solid #000;
+            border-radius: 8px;
+            background: #87CEEB;
+            cursor: crosshair;
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Touch / Mobile Controls Overlay */
+        .touch-controls {
+            display: none; /* Shown during Play Mode */
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            justify-content: space-between;
+            pointer-events: none;
+        }
+
+        .touch-btn-group {
             display: flex;
-            flex-direction: column;
+            gap: 10px;
+            pointer-events: auto;
+        }
+
+        .touch-btn {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.85);
+            border: 3px solid #000;
+            border-radius: 50%;
+            font-weight: 900;
+            font-size: 18px;
+            display: flex;
             align-items: center;
             justify-content: center;
-            padding: 10px;
+            user-select: none;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #000;
         }
 
-        .editor-textarea {
-            width: 100%;
-            height: 100%;
-            min-height: 250px;
-            border: 2px solid #000;
-            border-radius: 8px;
-            padding: 10px;
-            font-family: monospace;
-            resize: vertical;
+        .touch-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #000;
+            background: #ffbe0b;
         }
 
         .sidebar {
@@ -148,41 +170,94 @@
             gap: 10px;
         }
 
-        .sidebar-title {
-            font-size: 14px;
-            font-weight: 800;
-            margin: 0;
+        .palette-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .palette-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            border: 2px solid #000;
+            border-radius: 8px;
+            cursor: pointer;
+            background: #fff;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .palette-option.selected {
+            outline: 3px solid #ffbe0b;
+            background: #e7f5ff;
+        }
+
+        .color-box {
+            width: 18px;
+            height: 18px;
+            border: 1px solid #000;
+            border-radius: 4px;
         }
     </style>
 </head>
 <body>
 
-    <div class="clouds-bg"></div>
-
     <div class="studio-container">
         <div class="toolbar">
-            <input type="text" id="project-name" class="project-title-input" value="My New Project">
+            <input type="text" id="project-name" class="project-title-input" value="My World Game">
             <span id="save-status" class="status-badge">New Local Draft</span>
             
             <div class="btn-group">
                 <button id="back-btn" class="btn-custom btn-back">Profile</button>
+                <button id="play-btn" class="btn-custom btn-play">▶ Test Game</button>
                 <button id="save-local-btn" class="btn-custom btn-save">Save Project</button>
                 <button id="publish-btn" class="btn-custom btn-publish">Publish Game</button>
             </div>
         </div>
 
         <div class="workspace">
-            <div class="canvas-area">
-                <label style="font-weight: 800; margin-bottom: 8px;">GAME DATA STRING</label>
-                <textarea id="game-code" class="editor-textarea" placeholder="// Put your game data string here..."></textarea>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 2;">
+                <div class="canvas-wrapper">
+                    <canvas id="gameCanvas" width="512" height="384"></canvas>
+                    
+                    <div id="touch-controls" class="touch-controls">
+                        <div class="touch-btn-group">
+                            <div class="touch-btn" id="btn-left">◄</div>
+                            <div class="touch-btn" id="btn-right">►</div>
+                        </div>
+                        <div class="touch-btn-group">
+                            <div class="touch-btn" id="btn-jump">▲</div>
+                        </div>
+                    </div>
+                </div>
+                <span id="mode-indicator" style="font-weight: bold; font-size: 13px;">Mode: Editor (Click/Tap to Place)</span>
             </div>
 
             <div class="sidebar">
-                <h4 class="sidebar-title">Project Info</h4>
-                <p id="mode-desc" style="font-size: 12px; color: #555; margin: 0;">Unpublished project stored strictly in local storage.</p>
-                <hr style="width: 100%; border: 1px solid #ccc;">
-                <label style="font-size: 11px; font-weight: bold;">GAME ID</label>
-                <div id="game-id-display" style="font-size: 10px; font-family: monospace; word-break: break-all;">None (Unpublished)</div>
+                <h4 style="margin: 0;">Toolbox / Palette</h4>
+                <div class="palette-grid">
+                    <div class="palette-option selected" data-type="grass">
+                        <div class="color-box" style="background: #2e7d32;"></div> Grass
+                    </div>
+                    <div class="palette-option" data-type="dirt">
+                        <div class="color-box" style="background: #795548;"></div> Dirt
+                    </div>
+                    <div class="palette-option" data-type="player">
+                        <div class="color-box" style="background: #00ff66;"></div> Player
+                    </div>
+                    <div class="palette-option" data-type="erase">
+                        <div class="color-box" style="background: #fff;"></div> Eraser
+                    </div>
+                </div>
+
+                <hr style="width: 100%; margin: 5px 0;">
+                <p style="font-size: 11px; color: #555; margin: 0;">
+                    <strong>Controls:</strong><br>
+                    • <strong>PC:</strong> WASD / Arrow Keys / Spacebar<br>
+                    • <strong>Mobile:</strong> On-screen touch buttons
+                </p>
             </div>
         </div>
     </div>
@@ -203,180 +278,266 @@
 
         const db = firebase.firestore();
         let currentUser = null;
-        let activeGameId = null; // Stores published Game ID if editing an existing published game
+        let activeGameId = new URLSearchParams(window.location.search).get('gameId');
 
-        // Detect URL query parameter if opening an existing game (e.g. studio.html?gameId=XYZ)
-        const urlParams = new URLSearchParams(window.location.search);
-        const urlGameId = urlParams.get('gameId');
+        // Engine & Scene Data
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        const touchControls = document.getElementById("touch-controls");
+        const TILE_SIZE = 32;
 
+        let selectedTool = "grass";
+        let isPlayMode = false;
+        let gameLoopId = null;
+
+        // Level State
+        let levelData = {
+            playerStart: { x: 2, y: 8 },
+            blocks: [
+                { x: 0, y: 11, type: "grass" }, { x: 1, y: 11, type: "grass" }, { x: 2, y: 11, type: "grass" },
+                { x: 3, y: 11, type: "grass" }, { x: 4, y: 11, type: "grass" }, { x: 5, y: 11, type: "grass" },
+                { x: 6, y: 11, type: "grass" }, { x: 7, y: 11, type: "grass" }, { x: 8, y: 11, type: "grass" },
+                { x: 9, y: 11, type: "grass" }, { x: 10, y: 11, type: "grass" }, { x: 11, y: 11, type: "grass" },
+                { x: 12, y: 11, type: "grass" }, { x: 13, y: 11, type: "grass" }, { x: 14, y: 11, type: "grass" }, { x: 15, y: 11, type: "grass" }
+            ]
+        };
+
+        // Live Player State
+        let player = {
+            x: 0, y: 0,
+            vx: 0, vy: 0,
+            width: 28, height: 28,
+            grounded: false
+        };
+
+        // Input Tracking (PC + Mobile unified)
+        const inputs = { left: false, right: false, jump: false };
+
+        // Firebase Auth Init
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 currentUser = user;
-                initStudio();
+                if (activeGameId) loadPublishedGame(activeGameId);
+                else loadUnpublishedDraft();
             } else {
                 window.location.href = "index.html";
             }
         });
 
-        // Initialize Studio Session
-        function initStudio() {
-            if (urlGameId) {
-                // Scenario: Editing an existing published game
-                activeGameId = urlGameId;
-                document.getElementById("game-id-display").innerText = activeGameId;
-                document.getElementById("save-status").innerText = "Editing Published Game";
-                document.getElementById("mode-desc").innerText = "Saving will update the 'localgame' draft field until you republish.";
-                
-                loadPublishedGameForEditing(activeGameId);
+        // Palette Selector
+        document.querySelectorAll(".palette-option").forEach(opt => {
+            opt.addEventListener("click", () => {
+                document.querySelectorAll(".palette-option").forEach(o => o.classList.remove("selected"));
+                opt.classList.add("selected");
+                selectedTool = opt.getAttribute("data-type");
+            });
+        });
+
+        // Canvas Click/Touch Placement
+        canvas.addEventListener("pointerdown", (e) => {
+            if (isPlayMode) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            const gridX = Math.floor(((e.clientX - rect.left) * scaleX) / TILE_SIZE);
+            const gridY = Math.floor(((e.clientY - rect.top) * scaleY) / TILE_SIZE);
+
+            if (selectedTool === "player") {
+                levelData.playerStart = { x: gridX, y: gridY };
+            } else if (selectedTool === "erase") {
+                levelData.blocks = levelData.blocks.filter(b => !(b.x === gridX && b.y === gridY));
             } else {
-                // Scenario: New or unpublished project draft
-                loadUnpublishedLocalDraft();
+                levelData.blocks = levelData.blocks.filter(b => !(b.x === gridX && b.y === gridY));
+                levelData.blocks.push({ x: gridX, y: gridY, type: selectedTool });
             }
+
+            drawEditor();
+        });
+
+        // Render Editor Scene
+        function drawEditor() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Grid Lines
+            ctx.strokeStyle = "rgba(0, 0, 0, 0.15)";
+            for (let x = 0; x <= canvas.width; x += TILE_SIZE) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+            }
+            for (let y = 0; y <= canvas.height; y += TILE_SIZE) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+            }
+
+            // Blocks
+            levelData.blocks.forEach(b => {
+                ctx.fillStyle = b.type === "grass" ? "#2e7d32" : "#795548";
+                ctx.fillRect(b.x * TILE_SIZE, b.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                ctx.strokeStyle = "#000";
+                ctx.strokeRect(b.x * TILE_SIZE, b.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+            });
+
+            // Player Spawn Marker
+            ctx.fillStyle = "#00ff66";
+            ctx.fillRect(levelData.playerStart.x * TILE_SIZE + 2, levelData.playerStart.y * TILE_SIZE + 2, 28, 28);
+            ctx.strokeStyle = "#000";
+            ctx.strokeRect(levelData.playerStart.x * TILE_SIZE + 2, levelData.playerStart.y * TILE_SIZE + 2, 28, 28);
         }
 
-        // 1. Load Unpublished Local Draft
-        function loadUnpublishedLocalDraft() {
-            const savedData = localStorage.getItem("devworld_unpublished_draft");
-            if (savedData) {
-                const draft = JSON.parse(savedData);
-                document.getElementById("project-name").value = draft.title || "My New Project";
-                document.getElementById("game-code").value = draft.content || "";
+        // Toggle Play / Editor Mode
+        document.getElementById("play-btn").addEventListener("click", () => {
+            isPlayMode = !isPlayMode;
+            const playBtn = document.getElementById("play-btn");
+            const indicator = document.getElementById("mode-indicator");
+
+            if (isPlayMode) {
+                playBtn.innerText = "■ Stop Testing";
+                indicator.innerText = "Mode: Playing";
+                touchControls.style.display = "flex"; // Show mobile/touch overlay
+                
+                // Spawn Player
+                player.x = levelData.playerStart.x * TILE_SIZE + 2;
+                player.y = levelData.playerStart.y * TILE_SIZE + 2;
+                player.vx = 0; player.vy = 0;
+
+                gameLoopId = requestAnimationFrame(gameLoop);
+            } else {
+                playBtn.innerText = "▶ Test Game";
+                indicator.innerText = "Mode: Editor (Click/Tap to Place)";
+                touchControls.style.display = "none"; // Hide touch controls in editor
+                cancelAnimationFrame(gameLoopId);
+                drawEditor();
             }
+        });
+
+        // Game Loop
+        function gameLoop() {
+            if (!isPlayMode) return;
+
+            // Horizontal Input
+            if (inputs.left) player.vx = -3;
+            else if (inputs.right) player.vx = 3;
+            else player.vx = 0;
+
+            // Jump Input
+            if (inputs.jump && player.grounded) {
+                player.vy = -8;
+                player.grounded = false;
+            }
+
+            // Gravity
+            player.vy += 0.4;
+
+            // Movement Execution
+            player.x += player.vx;
+            player.y += player.vy;
+
+            player.grounded = false;
+
+            // Tile Collisions
+            levelData.blocks.forEach(b => {
+                const bx = b.x * TILE_SIZE;
+                const by = b.y * TILE_SIZE;
+
+                if (player.x < bx + TILE_SIZE && player.x + player.width > bx &&
+                    player.y < by + TILE_SIZE && player.y + player.height > by) {
+                    
+                    if (player.vy > 0 && player.y + player.height - player.vy <= by) {
+                        player.y = by - player.height;
+                        player.vy = 0;
+                        player.grounded = true;
+                    }
+                }
+            });
+
+            // Bottom Canvas Boundary
+            if (player.y + player.height >= canvas.height) {
+                player.y = canvas.height - player.height;
+                player.vy = 0;
+                player.grounded = true;
+            }
+
+            // Render Game Frame
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Render Blocks
+            levelData.blocks.forEach(b => {
+                ctx.fillStyle = b.type === "grass" ? "#2e7d32" : "#795548";
+                ctx.fillRect(b.x * TILE_SIZE, b.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+            });
+
+            // Render Active Player
+            ctx.fillStyle = "#00ff66";
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+            ctx.strokeStyle = "#000";
+            ctx.strokeRect(player.x, player.y, player.width, player.height);
+
+            gameLoopId = requestAnimationFrame(gameLoop);
         }
 
-        // 2. Load Published Game into Local Storage for Editing
-        function loadPublishedGameForEditing(gameId) {
-            db.collection("games").doc(gameId).get().then((doc) => {
+        // --- PC Keyboard Control Mapping ---
+        window.addEventListener("keydown", (e) => {
+            if (e.key === "ArrowLeft" || e.key.toLowerCase() === "a") inputs.left = true;
+            if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") inputs.right = true;
+            if (e.key === "ArrowUp" || e.key.toLowerCase() === "w" || e.key === " ") inputs.jump = true;
+        });
+
+        window.addEventListener("keyup", (e) => {
+            if (e.key === "ArrowLeft" || e.key.toLowerCase() === "a") inputs.left = false;
+            if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") inputs.right = false;
+            if (e.key === "ArrowUp" || e.key.toLowerCase() === "w" || e.key === " ") inputs.jump = false;
+        });
+
+        // --- Mobile / On-Screen Button Mapping ---
+        function setupTouchBtn(btnId, action) {
+            const btn = document.getElementById(btnId);
+            const startHandler = (e) => { e.preventDefault(); inputs[action] = true; };
+            const endHandler = (e) => { e.preventDefault(); inputs[action] = false; };
+
+            btn.addEventListener("pointerdown", startHandler);
+            btn.addEventListener("pointerup", endHandler);
+            btn.addEventListener("pointerleave", endHandler);
+        }
+
+        setupTouchBtn("btn-left", "left");
+        setupTouchBtn("btn-right", "right");
+        setupTouchBtn("btn-jump", "jump");
+
+        // --- Save / Load Handlers ---
+        function getSerializedGame() { return JSON.stringify(levelData); }
+
+        function loadUnpublishedDraft() {
+            const raw = localStorage.getItem("devworld_unpublished_draft");
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                document.getElementById("project-name").value = parsed.title || "My World Game";
+                if (parsed.content) levelData = JSON.parse(parsed.content);
+            }
+            drawEditor();
+        }
+
+        function loadPublishedGame(gameId) {
+            db.collection("games").doc(gameId).get().then(doc => {
                 if (doc.exists) {
                     const data = doc.data();
-                    document.getElementById("project-name").value = data.title || "Untitled Game";
-
-                    // Use localgame field if an uncommitted edit exists, otherwise load published data
-                    const currentDataString = data.localgame !== undefined ? data.localgame : data.content;
-                    document.getElementById("game-code").value = currentDataString || "";
-
-                    // Sync to Local Storage for active editing
-                    saveToLocalStorage(data.title, currentDataString);
-                } else {
-                    alert("Game document not found!");
-                    window.location.href = "profile.html";
+                    document.getElementById("project-name").value = data.title || "Untitled";
+                    const stringData = data.localgame !== undefined ? data.localgame : data.content;
+                    if (stringData) levelData = JSON.parse(stringData);
+                    drawEditor();
                 }
-            }).catch((err) => {
-                alert("Error loading game: " + err.message);
             });
         }
 
-        // Helper: Save current state to local storage
-        function saveToLocalStorage(title, content) {
-            const key = activeGameId ? `devworld_edit_${activeGameId}` : "devworld_unpublished_draft";
-            localStorage.setItem(key, JSON.stringify({
-                title: title,
-                content: content,
-                updatedAt: new Date().toISOString()
-            }));
-        }
-
-        // 3. Save Project Action (Local + localgame Field if published)
         document.getElementById("save-local-btn").addEventListener("click", () => {
             const title = document.getElementById("project-name").value;
-            const content = document.getElementById("game-code").value;
+            const content = getSerializedGame();
 
-            // Save to LocalStorage
-            saveToLocalStorage(title, content);
+            const key = activeGameId ? `devworld_edit_${activeGameId}` : "devworld_unpublished_draft";
+            localStorage.setItem(key, JSON.stringify({ title, content }));
 
-            const statusBadge = document.getElementById("save-status");
-
+            const badge = document.getElementById("save-status");
             if (activeGameId) {
-                // If it's a published game, update the 'localgame' field on Firestore
-                db.collection("games").doc(activeGameId).update({
-                    localgame: content,
-                    title: title
-                })
+                db.collection("games").doc(activeGameId).update({ localgame: content, title })
                 .then(() => {
-                    statusBadge.innerText = "Saved to 'localgame'!";
-                    statusBadge.style.background = "#48cae4";
-                })
-                .catch((err) => {
-                    alert("Error updating draft: " + err.message);
-                });
-            } else {
-                // Unpublished project
-                statusBadge.innerText = "Saved to Local Storage!";
-                statusBadge.style.background = "#51cf66";
-            }
-
-            setTimeout(() => {
-                statusBadge.innerText = activeGameId ? "Editing Published Game" : "New Local Draft";
-                statusBadge.style.background = "#ffbe0b";
-            }, 2000);
-        });
-
-        // 4. Publish Game Action (Pushes live, clears localStorage draft)
-        document.getElementById("publish-btn").addEventListener("click", () => {
-            if (!currentUser) return;
-
-            const title = document.getElementById("project-name").value;
-            const content = document.getElementById("game-code").value;
-
-            if (!title.trim()) {
-                alert("Please provide a project name before publishing.");
-                return;
-            }
-
-            if (activeGameId) {
-                // Republishing an existing game: Overwrite live content & clear localgame draft field
-                db.collection("games").doc(activeGameId).update({
-                    title: title,
-                    content: content,
-                    localgame: firebase.firestore.FieldValue.delete(), // Remove draft field once live
-                    lastPublished: firebase.firestore.FieldValue.serverTimestamp()
-                })
-                .then(() => {
-                    // Clear local storage for this edit
-                    localStorage.removeItem(`devworld_edit_${activeGameId}`);
-                    alert("Game republished live successfully!");
-                    document.getElementById("save-status").innerText = "Published Live!";
-                    document.getElementById("save-status").style.background = "#38b000";
-                })
-                .catch((err) => {
-                    alert("Error republishing game: " + err.message);
-                });
-            } else {
-                // Publishing a brand-new game
-                db.collection("games").add({
-                    title: title,
-                    content: content,
-                    authorId: currentUser.uid,
-                    publishedAt: firebase.firestore.FieldValue.serverTimestamp()
-                })
-                .then((docRef) => {
-                    activeGameId = docRef.id;
-                    
-                    // Add Game ID to user's Projects array
-                    return db.collection("users").doc(currentUser.uid).update({
-                        Projects: firebase.firestore.FieldValue.arrayUnion(docRef.id)
-                    });
-                })
-                .then(() => {
-                    // Clear unpublished draft out of Local Storage
-                    localStorage.removeItem("devworld_unpublished_draft");
-
-                    document.getElementById("game-id-display").innerText = activeGameId;
-                    alert("Game published successfully to Dev World!");
-                    document.getElementById("save-status").innerText = "Published Live!";
-                    document.getElementById("save-status").style.background = "#38b000";
-                })
-                .catch((err) => {
-                    alert("Error publishing game: " + err.message);
-                });
-            }
-        });
-
-        // Navigation
-        document.getElementById("back-btn").addEventListener("click", () => {
-            window.location.href = "profile.html";
-        });
-    </script>
-</body>
-  </html>
-  
+                    badge.innerText = "Saved to 'localgame'!";
+                    badge.style.background = "#48cae
