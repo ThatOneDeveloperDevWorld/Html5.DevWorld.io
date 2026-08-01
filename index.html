@@ -12,7 +12,6 @@
     <style>
         * { box-sizing: border-box; }
         body {
-            /* Uses your Devworldbetabgland.png background with a fallback color */
             background-color: #5ce1e6;
             background-image: url('Devworldbetabgland.png');
             background-size: cover;
@@ -30,7 +29,6 @@
             overflow-x: hidden;
         }
 
-        /* Clouds overlay element */
         .clouds-bg {
             position: fixed;
             top: 0;
@@ -105,9 +103,7 @@
         }
 
         .btn-start { background: #38b000; color: #fff; }
-        .btn-logout { background: #ff595e; color: #fff; }
 
-        /* Character decor container at the bottom */
         .character-footer {
             position: fixed;
             bottom: 0;
@@ -132,7 +128,6 @@
     <div class="clouds-bg"></div>
 
     <div class="main-container">
-        
         <img src="Devworldlogobeta.png" alt="Dev World Logo" class="logo-img">
         <div class="version-text">v0.8.0</div>
 
@@ -141,26 +136,11 @@
             <input type="password" id="pass-input" class="input-field" placeholder="Password">
             <button id="login-btn" class="btn-custom btn-start">Start!</button>
         </div>
-
-        <div id="profile-section" style="display: none; text-align: left;">
-            <h3 id="welcome-user" style="margin: 0 0 5px 0; font-size: 16px; text-align: center;">Welcome!</h3>
-            <p id="user-email-display" style="margin: 0 0 15px 0; font-size: 12px; color: #6c757d; text-align: center;"></p>
-            
-            <label style="font-size: 11px; font-weight: 800;">USERNAME</label>
-            <input type="text" id="username-input" class="input-field" placeholder="Username">
-            
-            <label style="font-size: 11px; font-weight: 800;">BIO</label>
-            <textarea id="bio-input" class="input-field" rows="2" placeholder="Tell us about yourself..."></textarea>
-            
-            <button id="save-btn" class="btn-custom" style="background: #48cae4; color: #000;">Save Profile</button>
-            <button id="logout-btn" class="btn-custom btn-logout" style="margin-bottom: 0;">Log Out</button>
-        </div>
-
     </div>
 
     <div class="character-footer">
-        <img src="Devworldchar1green.png" alt="Character" class="char-img">
-        <img src="Devworldchar1green.png" alt="Character" class="char-img" style="transform: scaleX(-1);">
+        <img src="Devworldchar1green.png" alt="Character" class="char-img" onerror="this.style.display='none'">
+        <img src="Devworldchar1green.png" alt="Character" class="char-img" style="transform: scaleX(-1);" onerror="this.style.display='none'">
     </div>
 
     <script>
@@ -179,34 +159,12 @@
 
         const db = firebase.firestore();
 
-        // Handle Auth State Changes
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
-                document.getElementById("auth-section").style.display = "none";
-                document.getElementById("profile-section").style.display = "block";
-                document.getElementById("user-email-display").innerText = user.email;
-
-                db.collection("users").doc(user.uid).get().then((doc) => {
-                    if (doc.exists) {
-                        const data = doc.data();
-                        document.getElementById("username-input").value = data.Username || "";
-                        document.getElementById("bio-input").value = data.Bio || "";
-                        document.getElementById("welcome-user").innerText = "Hey, " + (data.Username || "Creator") + "!";
-                    } else {
-                        db.collection("users").doc(user.uid).set({
-                            Username: "DevWorldUser",
-                            Bio: "Building awesome games!",
-                            Projects: [""]
-                        }, { merge: true });
-                    }
-                });
-            } else {
-                document.getElementById("auth-section").style.display = "block";
-                document.getElementById("profile-section").style.display = "none";
+                window.location.href = "profile.html";
             }
         });
 
-        // Login / Automatic Signup Handler
         document.getElementById("login-btn").addEventListener("click", () => {
             const email = document.getElementById("email-input").value;
             const pass = document.getElementById("pass-input").value;
@@ -217,38 +175,27 @@
             }
 
             firebase.auth().signInWithEmailAndPassword(email, pass)
+            .then(() => {
+                window.location.href = "profile.html";
+            })
             .catch(() => {
                 return firebase.auth().createUserWithEmailAndPassword(email, pass);
+            })
+            .then((userCredential) => {
+                if (userCredential && userCredential.user) {
+                    const user = userCredential.user;
+                    return db.collection("users").doc(user.uid).set({
+                        Username: "DevWorldUser",
+                        Bio: "Building awesome games!",
+                        Projects: []
+                    }, { merge: true }).then(() => {
+                        window.location.href = "profile.html";
+                    });
+                }
             })
             .catch((error) => {
                 alert("Error: " + error.message);
             });
-        });
-
-        // Save Profile Information
-        document.getElementById("save-btn").addEventListener("click", () => {
-            const user = firebase.auth().currentUser;
-            if (user) {
-                const username = document.getElementById("username-input").value;
-                const bio = document.getElementById("bio-input").value;
-
-                db.collection("users").doc(user.uid).set({
-                    Username: username,
-                    Bio: bio
-                }, { merge: true })
-                .then(() => {
-                    document.getElementById("welcome-user").innerText = "Hey, " + username + "!";
-                    alert("Profile updated!");
-                })
-                .catch((error) => {
-                    alert("Error saving: " + error.message);
-                });
-            }
-        });
-
-        // Log Out Handler
-        document.getElementById("logout-btn").addEventListener("click", () => {
-            firebase.auth().signOut();
         });
     </script>
 </body>
