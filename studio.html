@@ -2,136 +2,110 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dev World Studio v0.1.0</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dev World Studio</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
     <style>
-        * { box-sizing: border-box; touch-action: manipulation; }
+        * {
+            box-sizing: border-box;
+            touch-action: manipulation;
+            user-select: none;
+        }
+
         body {
-            background-color: #5ce1e6;
-            background-image: url('Devworldbetabgland.png');
-            background-size: cover;
-            background-position: center;
-            color: #212529;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #121212;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Top Header Navigation */
+        .top-bar {
+            height: 55px;
+            background: #1f1f1f;
+            border-bottom: 2px solid #333;
+            display: flex;
             align-items: center;
-            min-height: 100vh;
-            padding: 15px;
-        }
-
-        .studio-container {
-            width: 100%;
-            max-width: 900px;
-            background: #ffffff;
-            border: 4px solid #000000;
-            border-radius: 20px;
-            box-shadow: 0 8px 0px #000000;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .toolbar {
-            display: flex;
             justify-content: space-between;
-            align-items: center;
-            border-bottom: 3px solid #000;
-            padding-bottom: 10px;
-            flex-wrap: wrap;
-            gap: 10px;
+            padding: 0 12px;
+            gap: 8px;
+            z-index: 10;
         }
 
-        .project-title-input {
-            font-size: 16px;
-            font-weight: 800;
-            border: 2px solid #000;
-            border-radius: 8px;
+        .title-input {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #fff;
             padding: 6px 10px;
-            width: 200px;
-        }
-
-        .status-badge {
-            font-size: 12px;
-            font-weight: bold;
-            padding: 4px 8px;
             border-radius: 6px;
-            border: 1px solid #000;
-            background: #ffbe0b;
+            font-weight: bold;
+            font-size: 14px;
+            width: 140px;
         }
 
         .btn-group {
             display: flex;
             gap: 6px;
-            flex-wrap: wrap;
         }
 
-        .btn-custom {
-            padding: 8px 12px;
-            border: 2px solid #000;
-            border-radius: 8px;
-            font-weight: 800;
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
             font-size: 12px;
             cursor: pointer;
-            box-shadow: 2px 2px 0px #000;
-            transition: transform 0.1s ease;
+            transition: opacity 0.2s ease;
         }
 
-        .btn-custom:active {
-            transform: translate(2px, 2px);
-            box-shadow: 0px 0px 0px #000;
-        }
-
-        .btn-back { background: #e9ecef; }
+        .btn:active { opacity: 0.8; }
+        .btn-back { background: #3a3a3a; color: #fff; }
         .btn-play { background: #ff0055; color: #fff; }
-        .btn-save { background: #48cae4; }
-        .btn-publish { background: #38b000; color: #fff; }
+        .btn-save { background: #00b4d8; color: #fff; }
+        .btn-publish { background: #2ec4b6; color: #fff; }
 
-        .workspace {
-            display: flex;
-            gap: 15px;
-            flex-direction: column;
-        }
-
-        @media (min-width: 768px) {
-            .workspace { flex-direction: row; }
-        }
-
-        .canvas-wrapper {
+        /* Canvas Workspace */
+        .viewport {
+            flex: 1;
             position: relative;
-            display: inline-block;
-            align-self: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #181818;
+            overflow: hidden;
         }
 
         canvas {
-            border: 4px solid #000;
-            border-radius: 8px;
             background: #87CEEB;
-            cursor: crosshair;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
             max-width: 100%;
-            height: auto;
-            display: block;
+            max-height: 100%;
+            touch-action: none;
         }
 
-        /* Touch / Mobile Controls Overlay */
+        /* On-Screen Touch Overlay for Mobile */
         .touch-controls {
-            display: none; /* Shown during Play Mode */
+            display: none;
             position: absolute;
-            bottom: 10px;
-            left: 10px;
-            right: 10px;
+            bottom: 15px;
+            left: 15px;
+            right: 15px;
             justify-content: space-between;
             pointer-events: none;
+            z-index: 5;
         }
 
-        .touch-btn-group {
+        .touch-group {
             display: flex;
             gap: 10px;
             pointer-events: auto;
@@ -140,125 +114,108 @@
         .touch-btn {
             width: 50px;
             height: 50px;
-            background: rgba(255, 255, 255, 0.85);
-            border: 3px solid #000;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(255, 255, 255, 0.4);
             border-radius: 50%;
-            font-weight: 900;
-            font-size: 18px;
+            color: #fff;
+            font-size: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            user-select: none;
-            cursor: pointer;
-            box-shadow: 0 4px 0 #000;
         }
 
         .touch-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 2px 0 #000;
-            background: #ffbe0b;
+            background: rgba(255, 255, 255, 0.4);
         }
 
-        .sidebar {
-            flex: 1;
-            background: #f1f3f5;
-            border: 2px solid #000;
-            border-radius: 12px;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .palette-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-        }
-
-        .palette-option {
+        /* Bottom Tile Bar Palette */
+        .bottom-palette {
+            height: 75px;
+            background: #1f1f1f;
+            border-top: 2px solid #333;
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 8px;
-            border: 2px solid #000;
+            justify-content: center;
+            gap: 12px;
+            padding: 0 10px;
+            overflow-x: auto;
+            z-index: 10;
+        }
+
+        .tile-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            background: #2a2a2a;
+            border: 2px solid #444;
             border-radius: 8px;
             cursor: pointer;
-            background: #fff;
-            font-weight: bold;
-            font-size: 12px;
+            min-width: 65px;
         }
 
-        .palette-option.selected {
-            outline: 3px solid #ffbe0b;
-            background: #e7f5ff;
+        .tile-option.selected {
+            border-color: #ffbe0b;
+            background: #33332a;
         }
 
-        .color-box {
-            width: 18px;
-            height: 18px;
-            border: 1px solid #000;
+        .tile-preview {
+            width: 24px;
+            height: 24px;
             border-radius: 4px;
+            border: 1px solid #000;
+        }
+
+        .tile-label {
+            font-size: 10px;
+            font-weight: bold;
+            color: #ccc;
         }
     </style>
 </head>
 <body>
 
-    <div class="studio-container">
-        <div class="toolbar">
-            <input type="text" id="project-name" class="project-title-input" value="My World Game">
-            <span id="save-status" class="status-badge">New Local Draft</span>
-            
-            <div class="btn-group">
-                <button id="back-btn" class="btn-custom btn-back">Profile</button>
-                <button id="play-btn" class="btn-custom btn-play">▶ Test Game</button>
-                <button id="save-local-btn" class="btn-custom btn-save">Save Project</button>
-                <button id="publish-btn" class="btn-custom btn-publish">Publish Game</button>
+    <div class="top-bar">
+        <input type="text" id="project-name" class="title-input" value="My World">
+        <div class="btn-group">
+            <button id="back-btn" class="btn btn-back">Profile</button>
+            <button id="play-btn" class="btn btn-play">▶ Test</button>
+            <button id="save-btn" class="btn btn-save">Save</button>
+            <button id="publish-btn" class="btn btn-publish">Publish</button>
+        </div>
+    </div>
+
+    <div class="viewport">
+        <canvas id="gameCanvas" width="512" height="384"></canvas>
+
+        <div id="touch-controls" class="touch-controls">
+            <div class="touch-group">
+                <div class="touch-btn" id="btn-left">◄</div>
+                <div class="touch-btn" id="btn-right">►</div>
+            </div>
+            <div class="touch-group">
+                <div class="touch-btn" id="btn-jump">▲</div>
             </div>
         </div>
+    </div>
 
-        <div class="workspace">
-            <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 2;">
-                <div class="canvas-wrapper">
-                    <canvas id="gameCanvas" width="512" height="384"></canvas>
-                    
-                    <div id="touch-controls" class="touch-controls">
-                        <div class="touch-btn-group">
-                            <div class="touch-btn" id="btn-left">◄</div>
-                            <div class="touch-btn" id="btn-right">►</div>
-                        </div>
-                        <div class="touch-btn-group">
-                            <div class="touch-btn" id="btn-jump">▲</div>
-                        </div>
-                    </div>
-                </div>
-                <span id="mode-indicator" style="font-weight: bold; font-size: 13px;">Mode: Editor (Click/Tap to Place)</span>
-            </div>
-
-            <div class="sidebar">
-                <h4 style="margin: 0;">Toolbox / Palette</h4>
-                <div class="palette-grid">
-                    <div class="palette-option selected" data-type="grass">
-                        <div class="color-box" style="background: #2e7d32;"></div> Grass
-                    </div>
-                    <div class="palette-option" data-type="dirt">
-                        <div class="color-box" style="background: #795548;"></div> Dirt
-                    </div>
-                    <div class="palette-option" data-type="player">
-                        <div class="color-box" style="background: #00ff66;"></div> Player
-                    </div>
-                    <div class="palette-option" data-type="erase">
-                        <div class="color-box" style="background: #fff;"></div> Eraser
-                    </div>
-                </div>
-
-                <hr style="width: 100%; margin: 5px 0;">
-                <p style="font-size: 11px; color: #555; margin: 0;">
-                    <strong>Controls:</strong><br>
-                    • <strong>PC:</strong> WASD / Arrow Keys / Spacebar<br>
-                    • <strong>Mobile:</strong> On-screen touch buttons
-                </p>
-            </div>
+    <div class="bottom-palette" id="bottom-palette">
+        <div class="tile-option selected" data-type="grass">
+            <div class="tile-preview" style="background: #2e7d32;"></div>
+            <span class="tile-label">Grass</span>
+        </div>
+        <div class="tile-option" data-type="dirt">
+            <div class="tile-preview" style="background: #795548;"></div>
+            <span class="tile-label">Dirt</span>
+        </div>
+        <div class="tile-option" data-type="player">
+            <div class="tile-preview" style="background: #00ff66;"></div>
+            <span class="tile-label">Player</span>
+        </div>
+        <div class="tile-option" data-type="erase">
+            <div class="tile-preview" style="background: #ffffff;"></div>
+            <span class="tile-label">Eraser</span>
         </div>
     </div>
 
@@ -284,6 +241,7 @@
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
         const touchControls = document.getElementById("touch-controls");
+        const bottomPalette = document.getElementById("bottom-palette");
         const TILE_SIZE = 32;
 
         let selectedTool = "grass";
@@ -302,7 +260,7 @@
             ]
         };
 
-        // Live Player State
+        // Player State
         let player = {
             x: 0, y: 0,
             vx: 0, vy: 0,
@@ -310,7 +268,6 @@
             grounded: false
         };
 
-        // Input Tracking (PC + Mobile unified)
         const inputs = { left: false, right: false, jump: false };
 
         // Firebase Auth Init
@@ -324,18 +281,19 @@
             }
         });
 
-        // Palette Selector
-        document.querySelectorAll(".palette-option").forEach(opt => {
+        // Bottom Tile Selector
+        document.querySelectorAll(".tile-option").forEach(opt => {
             opt.addEventListener("click", () => {
-                document.querySelectorAll(".palette-option").forEach(o => o.classList.remove("selected"));
+                document.querySelectorAll(".tile-option").forEach(o => o.classList.remove("selected"));
                 opt.classList.add("selected");
                 selectedTool = opt.getAttribute("data-type");
             });
         });
 
-        // Canvas Click/Touch Placement
+        // Grid Click / Pointer Placement
         canvas.addEventListener("pointerdown", (e) => {
             if (isPlayMode) return;
+            e.preventDefault();
 
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width;
@@ -356,12 +314,12 @@
             drawEditor();
         });
 
-        // Render Editor Scene
+        // Render Editor Grid & Blocks
         function drawEditor() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Grid Lines
-            ctx.strokeStyle = "rgba(0, 0, 0, 0.15)";
+            // Draw Editor Grid Lines
+            ctx.strokeStyle = "rgba(0, 0, 0, 0.2)";
             for (let x = 0; x <= canvas.width; x += TILE_SIZE) {
                 ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
             }
@@ -369,7 +327,7 @@
                 ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
             }
 
-            // Blocks
+            // Draw Blocks
             levelData.blocks.forEach(b => {
                 ctx.fillStyle = b.type === "grass" ? "#2e7d32" : "#795548";
                 ctx.fillRect(b.x * TILE_SIZE, b.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
@@ -377,64 +335,55 @@
                 ctx.strokeRect(b.x * TILE_SIZE, b.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
             });
 
-            // Player Spawn Marker
+            // Draw Player Start Box
             ctx.fillStyle = "#00ff66";
             ctx.fillRect(levelData.playerStart.x * TILE_SIZE + 2, levelData.playerStart.y * TILE_SIZE + 2, 28, 28);
             ctx.strokeStyle = "#000";
             ctx.strokeRect(levelData.playerStart.x * TILE_SIZE + 2, levelData.playerStart.y * TILE_SIZE + 2, 28, 28);
         }
 
-        // Toggle Play / Editor Mode
+        // Toggle Test Mode
         document.getElementById("play-btn").addEventListener("click", () => {
             isPlayMode = !isPlayMode;
             const playBtn = document.getElementById("play-btn");
-            const indicator = document.getElementById("mode-indicator");
 
             if (isPlayMode) {
-                playBtn.innerText = "■ Stop Testing";
-                indicator.innerText = "Mode: Playing";
-                touchControls.style.display = "flex"; // Show mobile/touch overlay
+                playBtn.innerText = "■ Stop";
+                touchControls.style.display = "flex";
+                bottomPalette.style.display = "none";
                 
-                // Spawn Player
                 player.x = levelData.playerStart.x * TILE_SIZE + 2;
                 player.y = levelData.playerStart.y * TILE_SIZE + 2;
                 player.vx = 0; player.vy = 0;
 
                 gameLoopId = requestAnimationFrame(gameLoop);
             } else {
-                playBtn.innerText = "▶ Test Game";
-                indicator.innerText = "Mode: Editor (Click/Tap to Place)";
-                touchControls.style.display = "none"; // Hide touch controls in editor
+                playBtn.innerText = "▶ Test";
+                touchControls.style.display = "none";
+                bottomPalette.style.display = "flex";
                 cancelAnimationFrame(gameLoopId);
                 drawEditor();
             }
         });
 
-        // Game Loop
+        // Game Engine Loop
         function gameLoop() {
             if (!isPlayMode) return;
 
-            // Horizontal Input
             if (inputs.left) player.vx = -3;
             else if (inputs.right) player.vx = 3;
             else player.vx = 0;
 
-            // Jump Input
             if (inputs.jump && player.grounded) {
                 player.vy = -8;
                 player.grounded = false;
             }
 
-            // Gravity
             player.vy += 0.4;
-
-            // Movement Execution
             player.x += player.vx;
             player.y += player.vy;
-
             player.grounded = false;
 
-            // Tile Collisions
             levelData.blocks.forEach(b => {
                 const bx = b.x * TILE_SIZE;
                 const by = b.y * TILE_SIZE;
@@ -450,23 +399,19 @@
                 }
             });
 
-            // Bottom Canvas Boundary
             if (player.y + player.height >= canvas.height) {
                 player.y = canvas.height - player.height;
                 player.vy = 0;
                 player.grounded = true;
             }
 
-            // Render Game Frame
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Render Blocks
             levelData.blocks.forEach(b => {
                 ctx.fillStyle = b.type === "grass" ? "#2e7d32" : "#795548";
                 ctx.fillRect(b.x * TILE_SIZE, b.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
             });
 
-            // Render Active Player
             ctx.fillStyle = "#00ff66";
             ctx.fillRect(player.x, player.y, player.width, player.height);
             ctx.strokeStyle = "#000";
@@ -475,7 +420,7 @@
             gameLoopId = requestAnimationFrame(gameLoop);
         }
 
-        // --- PC Keyboard Control Mapping ---
+        // Keyboard Event Handlers
         window.addEventListener("keydown", (e) => {
             if (e.key === "ArrowLeft" || e.key.toLowerCase() === "a") inputs.left = true;
             if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") inputs.right = true;
@@ -488,29 +433,29 @@
             if (e.key === "ArrowUp" || e.key.toLowerCase() === "w" || e.key === " ") inputs.jump = false;
         });
 
-        // --- Mobile / On-Screen Button Mapping ---
+        // Touch Button Handlers
         function setupTouchBtn(btnId, action) {
             const btn = document.getElementById(btnId);
-            const startHandler = (e) => { e.preventDefault(); inputs[action] = true; };
-            const endHandler = (e) => { e.preventDefault(); inputs[action] = false; };
+            const start = (e) => { e.preventDefault(); inputs[action] = true; };
+            const end = (e) => { e.preventDefault(); inputs[action] = false; };
 
-            btn.addEventListener("pointerdown", startHandler);
-            btn.addEventListener("pointerup", endHandler);
-            btn.addEventListener("pointerleave", endHandler);
+            btn.addEventListener("pointerdown", start);
+            btn.addEventListener("pointerup", end);
+            btn.addEventListener("pointerleave", end);
         }
 
         setupTouchBtn("btn-left", "left");
         setupTouchBtn("btn-right", "right");
         setupTouchBtn("btn-jump", "jump");
 
-        // --- Save / Load Handlers ---
+        // Save & Publish
         function getSerializedGame() { return JSON.stringify(levelData); }
 
         function loadUnpublishedDraft() {
             const raw = localStorage.getItem("devworld_unpublished_draft");
             if (raw) {
                 const parsed = JSON.parse(raw);
-                document.getElementById("project-name").value = parsed.title || "My World Game";
+                document.getElementById("project-name").value = parsed.title || "My World";
                 if (parsed.content) levelData = JSON.parse(parsed.content);
             }
             drawEditor();
@@ -528,16 +473,56 @@
             });
         }
 
-        document.getElementById("save-local-btn").addEventListener("click", () => {
+        document.getElementById("save-btn").addEventListener("click", () => {
             const title = document.getElementById("project-name").value;
             const content = getSerializedGame();
 
             const key = activeGameId ? `devworld_edit_${activeGameId}` : "devworld_unpublished_draft";
             localStorage.setItem(key, JSON.stringify({ title, content }));
 
-            const badge = document.getElementById("save-status");
             if (activeGameId) {
                 db.collection("games").doc(activeGameId).update({ localgame: content, title })
-                .then(() => {
-                    badge.innerText = "Saved to 'localgame'!";
-                    badge.style.background = "#48cae
+                .then(() => alert("Draft saved to cloud!"));
+            } else {
+                alert("Saved locally!");
+            }
+        });
+
+        document.getElementById("publish-btn").addEventListener("click", () => {
+            if (!currentUser) return;
+            const title = document.getElementById("project-name").value;
+            const content = getSerializedGame();
+
+            if (!content || levelData.blocks.length === 0) {
+                alert("Place at least one block before publishing!");
+                return;
+            }
+
+            if (activeGameId) {
+                db.collection("games").doc(activeGameId).update({
+                    title, content,
+                    localgame: firebase.firestore.FieldValue.delete()
+                }).then(() => alert("Game published live!"));
+            } else {
+                db.collection("games").add({
+                    title, content,
+                    authorId: currentUser.uid,
+                    publishedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }).then(docRef => {
+                    activeGameId = docRef.id;
+                    return db.collection("users").doc(currentUser.uid).update({
+                        Projects: firebase.firestore.FieldValue.arrayUnion(docRef.id)
+                    });
+                }).then(() => alert("Game published to Dev World!"));
+            }
+        });
+
+        document.getElementById("back-btn").addEventListener("click", () => {
+            window.location.href = "profile.html";
+        });
+
+        drawEditor();
+    </script>
+</body>
+    </html>
+        
