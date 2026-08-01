@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev World Studio v0.1.0</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            background-color: #5ce1e6;
+            background-image: url('Devworldbetabgland.png');
+            background-size: cover;
+            background-position: center;
+            color: #212529;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .clouds-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('Devworldclouds.png');
+            background-repeat: repeat-x;
+            background-size: contain;
+            opacity: 0.8;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .studio-container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 800px;
+            background: #ffffff;
+            border: 4px solid #000000;
+            border-radius: 20px;
+            box-shadow: 0 8px 0px #000000;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #000;
+            padding-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .project-title-input {
+            font-size: 18px;
+            font-weight: 800;
+            border: 2px solid #000;
+            border-radius: 8px;
+            padding: 6px 10px;
+            width: 250px;
+        }
+
+        .status-badge {
+            font-size: 12px;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid #000;
+            background: #ffbe0b;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-custom {
+            padding: 8px 14px;
+            border: 2px solid #000;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 13px;
+            cursor: pointer;
+            box-shadow: 2px 2px 0px #000;
+            transition: transform 0.1s ease;
+        }
+
+        .btn-custom:active {
+            transform: translate(2px, 2px);
+            box-shadow: 0px 0px 0px #000;
+        }
+
+        .btn-back { background: #e9ecef; }
+        .btn-save { background: #48cae4; }
+        .btn-publish { background: #38b000; color: #fff; }
+
+        .workspace {
+            display: flex;
+            gap: 15px;
+            min-height: 350px;
+        }
+
+        .canvas-area {
+            flex: 2;
+            background: #f8f9fa;
+            border: 3px dashed #000;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        .editor-textarea {
+            width: 100%;
+            height: 100%;
+            min-height: 250px;
+            border: 2px solid #000;
+            border-radius: 8px;
+            padding: 10px;
+            font-family: monospace;
+            resize: vertical;
+        }
+
+        .sidebar {
+            flex: 1;
+            background: #f1f3f5;
+            border: 2px solid #000;
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sidebar-title {
+            font-size: 14px;
+            font-weight: 800;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="clouds-bg"></div>
+
+    <div class="studio-container">
+        <div class="toolbar">
+            <input type="text" id="project-name" class="project-title-input" value="My New Project">
+            <span id="save-status" class="status-badge">New Local Draft</span>
+            
+            <div class="btn-group">
+                <button id="back-btn" class="btn-custom btn-back">Profile</button>
+                <button id="save-local-btn" class="btn-custom btn-save">Save Project</button>
+                <button id="publish-btn" class="btn-custom btn-publish">Publish Game</button>
+            </div>
+        </div>
+
+        <div class="workspace">
+            <div class="canvas-area">
+                <label style="font-weight: 800; margin-bottom: 8px;">GAME DATA STRING</label>
+                <textarea id="game-code" class="editor-textarea" placeholder="// Put your game data string here..."></textarea>
+            </div>
+
+            <div class="sidebar">
+                <h4 class="sidebar-title">Project Info</h4>
+                <p id="mode-desc" style="font-size: 12px; color: #555; margin: 0;">Unpublished project stored strictly in local storage.</p>
+                <hr style="width: 100%; border: 1px solid #ccc;">
+                <label style="font-size: 11px; font-weight: bold;">GAME ID</label>
+                <div id="game-id-display" style="font-size: 10px; font-family: monospace; word-break: break-all;">None (Unpublished)</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlHHkVs9AVAAknCAMknG_dAYzAIU9eGSA",
+            authDomain: "dev-world-c65f5.firebaseapp.com",
+            projectId: "dev-world-c65f5",
+            storageBucket: "dev-world-c65f5.firebasestorage.app",
+            messagingSenderId: "961103609829",
+            appId: "1:961103609829:web:ea87f9d0eb63dfde13790c"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        const db = firebase.firestore();
+        let currentUser = null;
+        let activeGameId = null; // Stores published Game ID if editing an existing published game
+
+        // Detect URL query parameter if opening an existing game (e.g. studio.html?gameId=XYZ)
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlGameId = urlParams.get('gameId');
+
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                currentUser = user;
+                initStudio();
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        // Initialize Studio Session
+        function initStudio() {
+            if (urlGameId) {
+                // Scenario: Editing an existing published game
+                activeGameId = urlGameId;
+                document.getElementById("game-id-display").innerText = activeGameId;
+                document.getElementById("save-status").innerText = "Editing Published Game";
+                document.getElementById("mode-desc").innerText = "Saving will update the 'localgame' draft field until you republish.";
+                
+                loadPublishedGameForEditing(activeGameId);
+            } else {
+                // Scenario: New or unpublished project draft
+                loadUnpublishedLocalDraft();
+            }
+        }
+
+        // 1. Load Unpublished Local Draft
+        function loadUnpublishedLocalDraft() {
+            const savedData = localStorage.getItem("devworld_unpublished_draft");
+            if (savedData) {
+                const draft = JSON.parse(savedData);
+                document.getElementById("project-name").value = draft.title || "My New Project";
+                document.getElementById("game-code").value = draft.content || "";
+            }
+        }
+
+        // 2. Load Published Game into Local Storage for Editing
+        function loadPublishedGameForEditing(gameId) {
+            db.collection("games").doc(gameId).get().then((doc) => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    document.getElementById("project-name").value = data.title || "Untitled Game";
+
+                    // Use localgame field if an uncommitted edit exists, otherwise load published data
+                    const currentDataString = data.localgame !== undefined ? data.localgame : data.content;
+                    document.getElementById("game-code").value = currentDataString || "";
+
+                    // Sync to Local Storage for active editing
+                    saveToLocalStorage(data.title, currentDataString);
+                } else {
+                    alert("Game document not found!");
+                    window.location.href = "profile.html";
+                }
+            }).catch((err) => {
+                alert("Error loading game: " + err.message);
+            });
+        }
+
+        // Helper: Save current state to local storage
+        function saveToLocalStorage(title, content) {
+            const key = activeGameId ? `devworld_edit_${activeGameId}` : "devworld_unpublished_draft";
+            localStorage.setItem(key, JSON.stringify({
+                title: title,
+                content: content,
+                updatedAt: new Date().toISOString()
+            }));
+        }
+
+        // 3. Save Project Action (Local + localgame Field if published)
+        document.getElementById("save-local-btn").addEventListener("click", () => {
+            const title = document.getElementById("project-name").value;
+            const content = document.getElementById("game-code").value;
+
+            // Save to LocalStorage
+            saveToLocalStorage(title, content);
+
+            const statusBadge = document.getElementById("save-status");
+
+            if (activeGameId) {
+                // If it's a published game, update the 'localgame' field on Firestore
+                db.collection("games").doc(activeGameId).update({
+                    localgame: content,
+                    title: title
+                })
+                .then(() => {
+                    statusBadge.innerText = "Saved to 'localgame'!";
+                    statusBadge.style.background = "#48cae4";
+                })
+                .catch((err) => {
+                    alert("Error updating draft: " + err.message);
+                });
+            } else {
+                // Unpublished project
+                statusBadge.innerText = "Saved to Local Storage!";
+                statusBadge.style.background = "#51cf66";
+            }
+
+            setTimeout(() => {
+                statusBadge.innerText = activeGameId ? "Editing Published Game" : "New Local Draft";
+                statusBadge.style.background = "#ffbe0b";
+            }, 2000);
+        });
+
+        // 4. Publish Game Action (Pushes live, clears localStorage draft)
+        document.getElementById("publish-btn").addEventListener("click", () => {
+            if (!currentUser) return;
+
+            const title = document.getElementById("project-name").value;
+            const content = document.getElementById("game-code").value;
+
+            if (!title.trim()) {
+                alert("Please provide a project name before publishing.");
+                return;
+            }
+
+            if (activeGameId) {
+                // Republishing an existing game: Overwrite live content & clear localgame draft field
+                db.collection("games").doc(activeGameId).update({
+                    title: title,
+                    content: content,
+                    localgame: firebase.firestore.FieldValue.delete(), // Remove draft field once live
+                    lastPublished: firebase.firestore.FieldValue.serverTimestamp()
+                })
+                .then(() => {
+                    // Clear local storage for this edit
+                    localStorage.removeItem(`devworld_edit_${activeGameId}`);
+                    alert("Game republished live successfully!");
+                    document.getElementById("save-status").innerText = "Published Live!";
+                    document.getElementById("save-status").style.background = "#38b000";
+                })
+                .catch((err) => {
+                    alert("Error republishing game: " + err.message);
+                });
+            } else {
+                // Publishing a brand-new game
+                db.collection("games").add({
+                    title: title,
+                    content: content,
+                    authorId: currentUser.uid,
+                    publishedAt: firebase.firestore.FieldValue.serverTimestamp()
+                })
+                .then((docRef) => {
+                    activeGameId = docRef.id;
+                    
+                    // Add Game ID to user's Projects array
+                    return db.collection("users").doc(currentUser.uid).update({
+                        Projects: firebase.firestore.FieldValue.arrayUnion(docRef.id)
+                    });
+                })
+                .then(() => {
+                    // Clear unpublished draft out of Local Storage
+                    localStorage.removeItem("devworld_unpublished_draft");
+
+                    document.getElementById("game-id-display").innerText = activeGameId;
+                    alert("Game published successfully to Dev World!");
+                    document.getElementById("save-status").innerText = "Published Live!";
+                    document.getElementById("save-status").style.background = "#38b000";
+                })
+                .catch((err) => {
+                    alert("Error publishing game: " + err.message);
+                });
+            }
+        });
+
+        // Navigation
+        document.getElementById("back-btn").addEventListener("click", () => {
+            window.location.href = "profile.html";
+        });
+    </script>
+</body>
+  </html>
+  
