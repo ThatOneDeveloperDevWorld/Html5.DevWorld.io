@@ -13,6 +13,7 @@
         * {
             box-sizing: border-box;
             user-select: none;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
@@ -20,106 +21,114 @@
             padding: 0;
             width: 100vw;
             height: 100vh;
-            background: #0d0d0d;
-            color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #4de0e8; /* Matches profile background */
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
         }
 
+        /* Bold Pop-Art Container Card */
         .banned-card {
-            background: #1a1a1a;
-            border: 2px solid #ff0055;
-            border-radius: 16px;
-            padding: 35px 25px;
+            background: #ffffff;
+            border: 3px solid #000000;
+            border-radius: 24px;
+            padding: 30px 20px;
             max-width: 380px;
             width: 90%;
             text-align: center;
-            box-shadow: 0 10px 30px rgba(255, 0, 85, 0.25);
+            /* Hard Black Drop-Shadow Matching Profile Card */
+            box-shadow: 8px 8px 0px #000000;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 16px;
-            animation: fadeIn 0.3s ease-out;
+            gap: 12px;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.8); }
             to { opacity: 1; transform: scale(1); }
         }
 
-        .banned-icon {
-            width: 90px;
-            height: 90px;
+        .banned-logo {
+            width: 130px;
+            height: auto;
             object-fit: contain;
-            filter: drop-shadow(0 0 10px rgba(255, 0, 85, 0.4));
         }
 
         .banned-title {
-            margin: 0;
-            font-size: 24px;
-            color: #ffffff;
-            font-weight: 800;
-            letter-spacing: 0.5px;
+            margin: 5px 0 0 0;
+            font-size: 22px;
+            color: #000000;
+            font-weight: 900;
+            letter-spacing: -0.5px;
         }
 
-        .banned-text {
-            margin: 0;
+        .banned-text-box {
+            background: #f4f4f4;
+            border: 2px solid #000000;
+            border-radius: 12px;
+            padding: 12px;
             font-size: 13px;
-            color: #aaaaaa;
-            line-height: 1.6;
+            color: #333333;
+            line-height: 1.5;
+            font-weight: 600;
+            width: 100%;
         }
 
-        .user-info {
-            background: #111111;
-            border: 1px solid #333333;
+        .user-id-box {
+            background: #e0e0e0;
+            border: 2px dashed #000000;
             border-radius: 8px;
-            padding: 8px 12px;
+            padding: 6px 10px;
             font-size: 11px;
-            color: #ff0055;
+            color: #222222;
             word-break: break-all;
             width: 100%;
+            font-family: monospace;
+            font-weight: bold;
         }
 
+        /* Bold Action Button */
         .banned-btn {
-            margin-top: 5px;
+            margin-top: 8px;
             width: 100%;
-            padding: 12px;
-            background: #ff0055;
+            padding: 14px;
+            background: #ff5555;
             color: #ffffff;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 14px;
+            border: 3px solid #000000;
+            border-radius: 14px;
+            font-weight: 900;
+            font-size: 15px;
             cursor: pointer;
-            transition: background 0.2s, transform 0.1s;
+            box-shadow: 0px 4px 0px #000000;
+            transition: transform 0.1s, box-shadow 0.1s;
         }
 
         .banned-btn:active {
-            background: #d00045;
-            transform: scale(0.98);
+            transform: translateY(4px);
+            box-shadow: 0px 0px 0px #000000;
         }
     </style>
 </head>
 <body>
 
     <div class="banned-card">
-        <img src="bannedwarning.png" alt="Warning Icon" class="banned-icon" onerror="this.onerror=null; this.src='https://via.placeholder.com/90/ff0055/ffffff?text=!';">
+        <img src="logo.png" alt="Dev World Beta" class="banned-logo" onerror="this.onerror=null; this.src='bannedwarning.png';">
 
         <h1 class="banned-title">Account Suspended</h1>
         
-        <p class="banned-text">
-            Your Dev World account has been restricted due to violations of our community guidelines or Terms of Service.
-        </p>
+        <div class="banned-text-box">
+            Your Dev World account has been restricted for violating our community guidelines.
+        </div>
 
-        <div id="user-info" class="user-info">
-            Checking account details...
+        <div id="user-info" class="user-id-box">
+            Checking ID...
         </div>
 
         <button id="logout-btn" class="banned-btn">
-            Log Out & Return
+            Log Out
         </button>
     </div>
 
@@ -143,18 +152,17 @@
                 db.collection("users").doc(user.uid).get().then((doc) => {
                     if (doc.exists) {
                         const data = doc.data();
-                        // If user is actually NOT banned, send them back to home
+                        // If user is NOT banned, redirect to home
                         if (data.isBanned !== 1 && data.isBanned !== true) {
                             window.location.href = "home.html";
                             return;
                         }
                     }
-                    document.getElementById("user-info").innerText = "Account: " + (user.email || user.uid);
+                    document.getElementById("user-info").innerText = "ID: " + user.uid;
                 }).catch(() => {
-                    document.getElementById("user-info").innerText = "Account: " + (user.email || user.uid);
+                    document.getElementById("user-info").innerText = "ID: " + user.uid;
                 });
             } else {
-                // If not logged in at all, send back to login
                 window.location.href = "index.html";
             }
         });
@@ -166,5 +174,4 @@
         });
     </script>
 </body>
-  </html>
-
+</html>
