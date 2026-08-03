@@ -4,69 +4,111 @@
 <title>Dev World - login/sign up</title>
 <style>
 body {
-background-color: #1a1a1a ;
-color: #ffffff ;
-font-family: Arial, sans-serif;
+    background-color: #1a1a1a;
+    color: #ffffff;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
 }
-/* Centering thing, idrk what I'm doing*/
+
+/* Centering layout */
 .center-content {
-text-align: center;
+    text-align: center;
 }
 
 .center-content img {
-max-width: 800px;
-display: block;
-margin: 20px auto; }
-</style>
-</head>
-<div class="center-content">
-<img src="Devworldlogobeta.png">
-<h1>login or sign up</h1>
-<p>welcome to Dev world!</p>
-
-<div class="button-container">
-<button class="btn google-btn"
-onclick="openGoogleLogin()">
-Continue with Google
-</button>
-</div>
-</div>
-<script type="module">
-import { initializeApp, getApps } from "https://gstatic/firebasejs/10.8.0/firebase-auth.js";
-
-const firebaseConfig = {
-apiKey: "AIzaSyDlHHkVs9AVAAknCAMknG_dAYzAIU9eGSA",
-authDomain: "dev-world-c65f5.firebaseapp.com",
-projectId: "dev-world-c65f5",
-storageBucket: "dev-world-c65f5.firebasestorage.app",
-messagingSenderId: "961103609829",
-appId: "1:961103609829:web:ea87f9d0eb63dfde13790c"
-};
-// Initialize firebase with module thing idk
-let app;
-if (!getApps().length) {
-app = initializeApp(firebaseConfig);
-} else {
-app = getApps()[0];
+    max-width: 200px;
+    display: block;
+    margin: 0 auto 20px auto; 
 }
 
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
+.button-container {
+    margin-top: 20px;
+}
 
-// Functions thing
-window.openGoogleLogin = function() {
-signInWithPopup(auth, provider)
-.then((result) => {
-const user = result.user;
-consoleog("logged in as:",user.displayName);
-alert("Welcome back, " + user.displayName + "!");
-window.location.href = "profile.html";
-})
-.catch((error) => {
-console.error("Login error:", error.code, error.message);
-alert("Login failed: " + error.message);
-});
-};
+/* Styled to match the v0.8.0 "Start!" button */
+.btn {
+    padding: 15px 30px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: Arial, sans-serif;
+    transition: background-color 0.2s ease;
+}
+
+.google-btn {
+    background-color: #55ff55; /* green thingy idk */
+    color: #1a1a1a;            /* Dark text for high contrast */
+    border: 3px solid #33bb33;  /* Slightly darker green border */
+    box-shadow: 0 4px 0 #228822; /* shadow box thingy*/
+}
+
+.google-btn:hover {
+    background-color: #66ff66;
+}
+
+.google-btn:active {
+    transform: translateY(2px); /* Button press effect */
+    box-shadow: 0 2px 0 #228822;
+}
+</style>
+</head>
+<body>
+
+<div class="center-content">
+    <img src="Devworldlogobeta.png" alt="Dev World Logo">
+    <h1>login or sign up</h1>
+    <p>welcome to Dev world!</p>
+
+    <div class="button-container">
+        <button class="btn google-btn" onclick="openGoogleLogin()">
+            Continue with Google
+        </button>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDlHHkVs9AVAAknCAMknG_dAYzAIU9eGSA",
+        authDomain: "dev-world-c65f5.firebaseapp.com",
+        projectId: "dev-world-c65f5",
+        storageBucket: "dev-world-c65f5.firebasestorage.app",
+        messagingSenderId: "961103609829",
+        appId: "1:961103609829:web:ea87f9d0eb63dfde13790c"
+    };
+
+    // Initialize Firebase safely
+    let app;
+    if (!getApps().length) {
+        app = initializeApp(firebaseConfig);
+    } else {
+        app = getApps()[0];
+    }
+
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    // Make function available globally
+    window.openGoogleLogin = function() {
+        signInWithPopup(auth, provider)
+            .then((result) => {
+                const user = result.user;
+                console.log("logged in as:", user.displayName); // Fixed console.log typo
+                alert("Welcome back, " + user.displayName + "!");
+                window.location.href = "profile.html";
+            })
+            .catch((error) => {
+                console.error("Login error:", error.code, error.message);
+                alert("Login failed: " + error.message);
+            });
+    };
 </script>
 
 </body>
