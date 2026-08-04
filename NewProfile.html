@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Dev World - My profile</title>
+<style>
+body {
+    background-color: #1a1a1a;
+    color: #ffffff;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+}
+
+.profile-container {
+    text-align: center;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 30px;
+    border-radius: 12px;
+    border: 2px solid #33bb33;
+}
+
+/* PFP styling thing */
+.profile-pic-wrapper {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 20px auto;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: #55ff55; /* default tint color */
+    border: 3px solid #ffffff;
+}
+
+.profile-pic {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Blend thingy */
+    mix-blend-mode: multiply;
+}
+
+h1 {
+    margin: 10px 0;
+    font-size: 24px;
+}
+
+p {
+    color: #cccccc;
+    margin-bottom: 20px;
+}
+
+.color-picker-container {
+    margin-top: 15px;
+}
+
+label {
+    font-size: 14px;
+    display: block;
+    margin-bottom: 5px;
+}
+
+input[type="color"] {
+    border: none;
+    width: 50px;
+    height: 30px;
+    cursor: pointer;
+    background: none;
+}
+
+/* Styling shi */
+.btn {
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: Arial, sans-serif;
+    background-color: #ff5555;
+    color: #1a1a1a;
+    border: 3px solid #bb3333;
+    box-shadow: 0 4px 0 #882222;
+    margin-top: 20px;
+    transition: transform 0.1s ease;
+}
+
+.btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #882222;
+}
+</style>
+</head>
+<body>
+
+<div class="profile-container">
+    <div class="profile-pic-wrapper" id="pfpWrapper" style="background-color: #55ff55;">
+        <img src="profiledefres.png" alt="Profile picture" class="profile-pic">
+    </div>
+
+    <h1 id="usernameDisplay">Loading acc info...</h1>
+    <p id="emailDisplay">Finding info..</p>
+
+    <div class="color-picker-container">
+        <label for="colorPicker">Edit PFP color:</label>
+        <input type="color" id="colorPicker" value="#55ff55" onchange="changePfpColor(this.value)">
+    </div>
+
+    <div>
+        <button class="btn" onclick="logout()">Log out</button>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDlHHkVs9AVAAknCAMknG_dAYzAIU9eGSA",
+        authDomain: "dev-world-c65f5.firebaseapp.com",
+        projectId: "dev-world-c65f5",
+        storageBucket: "dev-world-c65f5.firebasestorage.app",
+        messagingSenderId: "961103609829",
+        appId: "1:961103609829:web:ea87f9d0eb63dfde13790c"
+    };
+
+    let app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];
+    const auth = getAuth(app);
+
+    // If you're logged in, stay. If not, go back to login
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            document.getElementById("usernameDisplay").innerText = user.displayName || "Dev World User";
+            document.getElementById("emailDisplay").innerText = user.email || "";
+        } else {
+            window.location.href = "index.html";
+        }
+    });
+
+    // Color switch thing
+    window.changePfpColor = function(color) {
+        document.getElementById("pfpWrapper").style.backgroundColor = color;
+    };
+
+    // Logout
+    window.logout = function() {
+        signOut(auth).then(() => {
+            window.location.href = "index.html";
+        }).catch((error) => {
+            console.error("Sign out error:", error);
+        });
+    };
+</script>
+
+</body>
+  </html>
+  
