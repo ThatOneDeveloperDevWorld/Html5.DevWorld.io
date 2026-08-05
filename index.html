@@ -1,79 +1,207 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Dev World - login/sign up</title>
+<title>Dev World - Welcome & Sign Up</title>
 <style>
 body {
-    background-color: #1a1a1a;
-    color: #ffffff;
+    background-color: #ffffff; /* Light mode white background */
+    color: #222222;
     font-family: Arial, sans-serif;
+    margin: 0;
+    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    margin: 0;
 }
 
-/* Centering layout */
-.center-content {
-    text-align: center;
+/* Split screen wrapper */
+.split-container {
+    display: flex;
+    width: 900px;
+    height: 550px;
+    background-color: #f9f9f9;
+    border: 3px solid #333333;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    overflow: hidden;
 }
 
-.center-content img {
-    max-width: 200px;
+/* Left side: App Details and Socials */
+.left-pane {
+    flex: 1;
+    background-color: #eaf4f9;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border-right: 3px solid #333333;
+}
+
+.app-info h1 {
+    font-size: 32px;
+    margin-top: 0;
+    color: #1a1a1a;
+}
+
+.app-info p {
+    color: #555555;
+    line-height: 1.5;
+    font-size: 15px;
+}
+
+.social-links {
+    display: flex;
+    gap: 15px;
+}
+
+.social-link {
+    font-size: 14px;
+    font-weight: bold;
+    color: #22a2ff;
+    text-decoration: none;
+}
+
+.social-link:hover {
+    text-decoration: underline;
+}
+
+/* Right side: Login & Forms */
+.right-pane {
+    flex: 1;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+}
+
+.form-step {
+    display: none;
+}
+
+.form-step.active {
     display: block;
-    margin: 0 auto 20px auto; 
 }
 
-.button-container {
-    margin-top: 20px;
+h2 {
+    margin-top: 0;
+    font-size: 24px;
 }
 
-/* Styled to match the v0.8.0 "Start!" button */
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.input-group input, .input-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #cccccc;
+    border-radius: 6px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+/* Arcade Buttons */
 .btn {
-    padding: 15px 30px;
-    font-size: 18px;
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
     font-weight: bold;
     border-radius: 6px;
     cursor: pointer;
     font-family: Arial, sans-serif;
-    transition: background-color 0.2s ease;
+    border: 3px solid #33bb33;
+    background-color: #55ff55;
+    color: #1a1a1a;
+    box-shadow: 0 4px 0 #228822;
+    transition: transform 0.1s ease;
+    margin-top: 10px;
+}
+
+.btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #228822;
 }
 
 .google-btn {
-    background-color: #55ff55; /* green thingy idk */
-    color: #1a1a1a;            /* Dark text for high contrast */
-    border: 3px solid #33bb33;  /* Slightly darker green border */
-    box-shadow: 0 4px 0 #228822; /* shadow box thingy*/
+    background-color: #ffffff;
+    border: 3px solid #dddddd;
+    color: #333333;
+    box-shadow: 0 4px 0 #cccccc;
+    margin-bottom: 15px;
 }
 
-.google-btn:hover {
-    background-color: #66ff66;
-}
-
-.google-btn:active {
-    transform: translateY(2px); /* Button press effect */
-    box-shadow: 0 2px 0 #228822;
+.divider {
+    text-align: center;
+    margin: 15px 0;
+    color: #888888;
+    font-size: 13px;
 }
 </style>
 </head>
 <body>
 
-<div class="center-content">
-    <img src="Devworldlogobeta.png" alt="Dev World Logo">
-    <h1>login or sign up</h1>
-    <p>welcome to Dev world!</p>
+<div class="split-container">
+    <div class="left-pane">
+        <div class="app-info">
+            <h1>Dev World</h1>
+            <p>Welcome to Dev world! a game creation website inspired by Julian's editor built as a passion project by ThatOneDev/ThatOneDeveloper on Julian's Editor/Builda.</p>
+        </div>
+        <div class="social-links">
+            <a href="https://discord.gg/TQFmDaCrs" target="_blank" class="social-link">Dev world discord</a>
+        </div>
+    </div>
 
-    <div class="button-container">
-        <button class="btn google-btn" onclick="openGoogleLogin()">
-            Continue with Google
-        </button>
+    <div class="right-pane">
+        
+        <div id="stepLogin" class="form-step active">
+            <h2>Get Started</h2>
+            <p style="color: #667; font-size: 14px; margin-bottom: 20px;">Choose a sign-in method to use Dev World.</p>
+            
+            <button class="btn google-btn" onclick="openGoogleLogin()">Continue with Google</button>
+            
+            <div class="divider">OR USE EMAIL</div>
+
+            <div class="input-group">
+                <label>Email Address</label>
+                <input type="email" id="emailInput" placeholder="name@example.com">
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="passInput" placeholder="••••••••">
+            </div>
+            <button class="btn" onclick="handleEmailLogin()">Sign In / Sign Up</button>
+        </div>
+
+        <div id="stepSetup" class="form-step">
+            <h2>Complete Your Profile</h2>
+            <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Pick a unique username and write a short bio for your page.</p>
+
+            <div class="input-group">
+                <label>Username</label>
+                <input type="text" id="usernameInput" placeholder="e.g. PixelMaster">
+            </div>
+            <div class="input-group">
+                <label>Bio</label>
+                <textarea id="bioInput" rows="3" placeholder="Tell the world what you like to build..."></textarea>
+            </div>
+            <button class="btn" onclick="saveProfileAndEnter()">Save & Enter Dev World</button>
+        </div>
+
     </div>
 </div>
 
 <script type="module">
     import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDlHHkVs9AVAAknCAMknG_dAYzAIU9eGSA",
@@ -84,32 +212,83 @@ body {
         appId: "1:961103609829:web:ea87f9d0eb63dfde13790c"
     };
 
-    // Initialize Firebase safely
-    let app;
-    if (!getApps().length) {
-        app = initializeApp(firebaseConfig);
-    } else {
-        app = getApps()[0];
-    }
-
+    let app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];
     const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
+    const db = getFirestore(app);
 
-    // Make function available globally
-    window.openGoogleLogin = function() {
-        signInWithPopup(auth, provider)
-            .then((result) => {
-                const user = result.user;
-                console.log("logged in as:", user.displayName); // Fixed console.log typo
-                alert("Welcome back, " + user.displayName + "!");
+    let activeUser = null;
+
+    // Check if user already exists in database with a username set
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            activeUser = user;
+            const docRef = doc(db, "users", user.uid);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists() && docSnap.data().username) {
                 window.location.href = "profile.html";
-            })
-            .catch((error) => {
-                console.error("Login error:", error.code, error.message);
-                alert("Login failed: " + error.message);
-            });
+            } else {
+                document.getElementById("stepLogin").classList.remove("active");
+                document.getElementById("stepSetup").classList.add("active");
+            }
+        }
+    });
+
+    // Google Sign-In trigger
+    window.openGoogleLogin = function() {
+        const provider = new GoogleAuthProvider();
+        signInWithPopup(auth, provider).catch((error) => {
+            alert("Google Login Failed: " + error.message);
+        });
+    };
+
+    // Traditional Email/Password Fallback handler
+    window.handleEmailLogin = async function() {
+        const email = document.getElementById("emailInput").value;
+        const password = document.getElementById("passInput").value;
+
+        if (!email || !password) {
+            alert("Please fill in both email and password.");
+            return;
+        }
+
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+        } catch (error) {
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+            } catch (createError) {
+                alert("Authentication error: " + createError.message);
+            }
+        }
+    };
+
+    // Save custom username and bio to Firestore database
+    window.saveProfileAndEnter = async function() {
+        const username = document.getElementById("usernameInput").value.trim();
+        const bio = document.getElementById("bioInput").value.trim();
+
+        if (!username) {
+            alert("Please choose a username.");
+            return;
+        }
+
+        if (activeUser) {
+            try {
+                await setDoc(doc(db, "users", activeUser.uid), {
+                    username: username,
+                    bio: bio,
+                    email: activeUser.email
+                }, { merge: true });
+
+                window.location.href = "profile.html";
+            } catch (error) {
+                alert("Error saving profile: " + error.message);
+            }
+        }
     };
 </script>
 
 </body>
-</html>
+    </html>
+    
