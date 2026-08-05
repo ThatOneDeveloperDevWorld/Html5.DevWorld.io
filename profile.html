@@ -145,6 +145,7 @@
         <textarea id="bio-input" class="input-field" rows="3" placeholder="Tell us about yourself..."></textarea>
         
         <button id="save-btn" class="btn-custom btn-save">Save Profile</button>
+        <button id="logout-btn" class="btn-custom btn-home">Home</button>
         <button id="logout-btn" class="btn-custom btn-logout">Log Out</button>
     </div>
 
@@ -209,11 +210,14 @@
             }
         });
 
-        document.getElementById("logout-btn").addEventListener("click", () => {
+        document.getElementById("home-btn").addEventListener("click", () => {
             firebase.auth().signOut().then(() => {
-                window.location.href = "index.html";
+                window.location.href = "home.html";
             });
         });
+        
+                });
+            }
     </script>
 </body>
   </html>
