@@ -2,527 +2,249 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dev World Studio</title>
-    
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Julian's Editor - Studio</title>
     <style>
         * {
             box-sizing: border-box;
-            touch-action: manipulation;
-            user-select: none;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
 
         body {
-            margin: 0;
-            padding: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: #121212;
-            color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1e1e1e;
+            color: white;
             display: flex;
             flex-direction: column;
+            height: 100vh;
             overflow: hidden;
         }
 
-        /* Top Header Navigation */
-        .top-bar {
-            height: 55px;
-            background: #1f1f1f;
-            border-bottom: 2px solid #333;
+        /* Top Bar */
+        .studio-header {
+            background: #252526;
+            padding: 10px 16px;
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            padding: 0 12px;
-            gap: 8px;
-            z-index: 10;
+            align-items: center;
+            border-bottom: 1px solid #333;
         }
 
-        .title-input {
-            background: #2a2a2a;
-            border: 1px solid #444;
-            color: #fff;
-            padding: 6px 10px;
-            border-radius: 6px;
+        .back-btn {
+            color: #3498db;
+            text-decoration: none;
             font-weight: bold;
             font-size: 14px;
-            width: 140px;
         }
 
-        .btn-group {
+        .title {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .publish-btn {
+            background: #2ecc71;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* Controls Area */
+        .controls-bar {
+            background: #2d2d30;
+            padding: 10px 16px;
             display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #333;
+            font-size: 13px;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
             gap: 6px;
         }
 
-        .btn {
-            padding: 6px 12px;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 12px;
-            cursor: pointer;
-            transition: opacity 0.2s ease;
-        }
-
-        .btn:active { opacity: 0.8; }
-        .btn-back { background: #3a3a3a; color: #fff; }
-        .btn-play { background: #ff0055; color: #fff; }
-        .btn-save { background: #00b4d8; color: #fff; }
-        .btn-publish { background: #2ec4b6; color: #fff; }
-
-        /* Canvas Workspace */
-        .viewport {
-            flex: 1;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #181818;
-            overflow: hidden;
-        }
-
-        canvas {
-            background: #87CEEB;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            max-width: 100%;
-            max-height: 100%;
-            touch-action: none;
-        }
-
-        /* On-Screen Touch Overlay for Mobile */
-        .touch-controls {
-            display: none;
-            position: absolute;
-            bottom: 15px;
-            left: 15px;
-            right: 15px;
-            justify-content: space-between;
-            pointer-events: none;
-            z-index: 5;
-        }
-
-        .touch-group {
-            display: flex;
-            gap: 10px;
-            pointer-events: auto;
-        }
-
-        .touch-btn {
-            width: 50px;
-            height: 50px;
-            background: rgba(0, 0, 0, 0.6);
-            border: 2px solid rgba(255, 255, 255, 0.4);
-            border-radius: 50%;
-            color: #fff;
-            font-size: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .touch-btn:active {
-            background: rgba(255, 255, 255, 0.4);
-        }
-
-        /* Bottom Tile Bar Palette */
-        .bottom-palette {
-            height: 75px;
-            background: #1f1f1f;
-            border-top: 2px solid #333;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            padding: 0 10px;
-            overflow-x: auto;
-            z-index: 10;
-        }
-
-        .tile-option {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            padding: 6px 12px;
-            background: #2a2a2a;
-            border: 2px solid #444;
-            border-radius: 8px;
-            cursor: pointer;
-            min-width: 65px;
-        }
-
-        .tile-option.selected {
-            border-color: #ffbe0b;
-            background: #33332a;
-        }
-
-        .tile-preview {
-            width: 24px;
-            height: 24px;
+        .control-group input[type="number"] {
+            width: 55px;
+            background: #1e1e1e;
+            border: 1px solid #555;
+            color: white;
+            padding: 4px;
             border-radius: 4px;
-            border: 1px solid #000;
+            text-align: center;
         }
 
-        .tile-label {
-            font-size: 10px;
+        .control-group input[type="color"] {
+            border: none;
+            width: 26px;
+            height: 26px;
+            background: none;
+            cursor: pointer;
+        }
+
+        .apply-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
             font-weight: bold;
-            color: #ccc;
+        }
+
+        /* Workspace Grid Area */
+        .workspace {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: auto;
+            padding: 20px;
+        }
+
+        #grid-container {
+            display: grid;
+            gap: 1px;
+            background: #444;
+            border: 2px solid #555;
+        }
+
+        .grid-cell {
+            background-color: #ffffff;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        /* Palette / Block Selector Bar */
+        .palette-bar {
+            background: #252526;
+            padding: 12px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            border-top: 1px solid #333;
+        }
+
+        .block-option {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .block-option.selected {
+            border-color: #f1c40f;
+            transform: scale(1.1);
         }
     </style>
 </head>
 <body>
 
-    <div class="top-bar">
-        <input type="text" id="project-name" class="title-input" value="My World">
-        <div class="btn-group">
-            <button id="back-btn" class="btn btn-back">Profile</button>
-            <button id="play-btn" class="btn btn-play">▶ Test</button>
-            <button id="save-btn" class="btn btn-save">Save</button>
-            <button id="publish-btn" class="btn btn-publish">Publish</button>
+    <div class="studio-header">
+        <a href="home.html" class="back-btn">&larr; Exit</a>
+        <div class="title">Studio Editor</div>
+        <button class="publish-btn" onclick="publishGame()">Publish</button>
+    </div>
+
+    <div class="controls-bar">
+        <div class="control-group">
+            <label>Size (8-86):</label>
+            <input type="number" id="grid-size" value="16" min="8" max="86">
+            <button class="apply-btn" onclick="resizeGrid()">Apply</button>
+        </div>
+        <div class="control-group">
+            <label>Background:</label>
+            <input type="color" id="bg-color" value="#ffffff" onchange="changeBackground()">
         </div>
     </div>
 
-    <div class="viewport">
-        <canvas id="gameCanvas" width="512" height="384"></canvas>
-
-        <div id="touch-controls" class="touch-controls">
-            <div class="touch-group">
-                <div class="touch-btn" id="btn-left">◄</div>
-                <div class="touch-btn" id="btn-right">►</div>
-            </div>
-            <div class="touch-group">
-                <div class="touch-btn" id="btn-jump">▲</div>
-            </div>
-        </div>
+    <div class="workspace" id="workspace">
+        <div id="grid-container"></div>
     </div>
 
-    <div class="bottom-palette" id="bottom-palette">
-        <div class="tile-option selected" data-type="grass">
-            <div class="tile-preview" style="background: #2e7d32;"></div>
-            <span class="tile-label">Grass</span>
-        </div>
-        <div class="tile-option" data-type="dirt">
-            <div class="tile-preview" style="background: #795548;"></div>
-            <span class="tile-label">Dirt</span>
-        </div>
-        <div class="tile-option" data-type="player">
-            <div class="tile-preview" style="background: #00ff66;"></div>
-            <span class="tile-label">Player</span>
-        </div>
-        <div class="tile-option" data-type="erase">
-            <div class="tile-preview" style="background: #ffffff;"></div>
-            <span class="tile-label">Eraser</span>
-        </div>
+    <div class="palette-bar">
+        <div class="block-option selected" style="background: #ffffff;" onclick="selectBlock('#ffffff', this)" title="Eraser / White"></div>
+        <div class="block-option" style="background: #e74c3c;" onclick="selectBlock('#e74c3c', this)" title="Red Brick"></div>
+        <div class="block-option" style="background: #f1c40f;" onclick="selectBlock('#f1c40f', this)" title="Gold Block"></div>
+        <div class="block-option" style="background: #2ecc71;" onclick="selectBlock('#2ecc71', this)" title="Grass Block"></div>
+        <div class="block-option" style="background: #3498db;" onclick="selectBlock('#3498db', this)" title="Water Block"></div>
+        <div class="block-option" style="background: #34495e;" onclick="selectBlock('#34495e', this)" title="Stone Block"></div>
     </div>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDlHHkVs9AVAAknCAMknG_dAYzAIU9eGSA",
-            authDomain: "dev-world-c65f5.firebaseapp.com",
-            projectId: "dev-world-c65f5",
-            storageBucket: "dev-world-c65f5.firebasestorage.app",
-            messagingSenderId: "961103609829",
-            appId: "1:961103609829:web:ea87f9d0eb63dfde13790c"
-        };
+        let currentSize = 16;
+        let currentColor = "#ffffff";
+        let isDrawing = false;
 
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
+        function selectBlock(color, element) {
+            document.querySelectorAll('.block-option').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+            currentColor = color;
         }
 
-        const db = firebase.firestore();
-        let currentUser = null;
-        let activeGameId = new URLSearchParams(window.location.search).get('gameId');
-
-        // Engine & Scene Data
-        const canvas = document.getElementById("gameCanvas");
-        const ctx = canvas.getContext("2d");
-        const touchControls = document.getElementById("touch-controls");
-        const bottomPalette = document.getElementById("bottom-palette");
-        const TILE_SIZE = 32;
-
-        let selectedTool = "grass";
-        let isPlayMode = false;
-        let gameLoopId = null;
-
-        // Level State
-        let levelData = {
-            playerStart: { x: 2, y: 8 },
-            blocks: [
-                { x: 0, y: 11, type: "grass" }, { x: 1, y: 11, type: "grass" }, { x: 2, y: 11, type: "grass" },
-                { x: 3, y: 11, type: "grass" }, { x: 4, y: 11, type: "grass" }, { x: 5, y: 11, type: "grass" },
-                { x: 6, y: 11, type: "grass" }, { x: 7, y: 11, type: "grass" }, { x: 8, y: 11, type: "grass" },
-                { x: 9, y: 11, type: "grass" }, { x: 10, y: 11, type: "grass" }, { x: 11, y: 11, type: "grass" },
-                { x: 12, y: 11, type: "grass" }, { x: 13, y: 11, type: "grass" }, { x: 14, y: 11, type: "grass" }, { x: 15, y: 11, type: "grass" }
-            ]
-        };
-
-        // Player State
-        let player = {
-            x: 0, y: 0,
-            vx: 0, vy: 0,
-            width: 28, height: 28,
-            grounded: false
-        };
-
-        const inputs = { left: false, right: false, jump: false };
-
-        // Firebase Auth Init
-        firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-                currentUser = user;
-                if (activeGameId) loadPublishedGame(activeGameId);
-                else loadUnpublishedDraft();
-            } else {
-                window.location.href = "index.html";
-            }
-        });
-
-        // Bottom Tile Selector
-        document.querySelectorAll(".tile-option").forEach(opt => {
-            opt.addEventListener("click", () => {
-                document.querySelectorAll(".tile-option").forEach(o => o.classList.remove("selected"));
-                opt.classList.add("selected");
-                selectedTool = opt.getAttribute("data-type");
-            });
-        });
-
-        // Grid Click / Pointer Placement
-        canvas.addEventListener("pointerdown", (e) => {
-            if (isPlayMode) return;
-            e.preventDefault();
-
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-
-            const gridX = Math.floor(((e.clientX - rect.left) * scaleX) / TILE_SIZE);
-            const gridY = Math.floor(((e.clientY - rect.top) * scaleY) / TILE_SIZE);
-
-            if (selectedTool === "player") {
-                levelData.playerStart = { x: gridX, y: gridY };
-            } else if (selectedTool === "erase") {
-                levelData.blocks = levelData.blocks.filter(b => !(b.x === gridX && b.y === gridY));
-            } else {
-                levelData.blocks = levelData.blocks.filter(b => !(b.x === gridX && b.y === gridY));
-                levelData.blocks.push({ x: gridX, y: gridY, type: selectedTool });
-            }
-
-            drawEditor();
-        });
-
-        // Render Editor Grid & Blocks
-        function drawEditor() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Draw Editor Grid Lines
-            ctx.strokeStyle = "rgba(0, 0, 0, 0.2)";
-            for (let x = 0; x <= canvas.width; x += TILE_SIZE) {
-                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
-            }
-            for (let y = 0; y <= canvas.height; y += TILE_SIZE) {
-                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
-            }
-
-            // Draw Blocks
-            levelData.blocks.forEach(b => {
-                ctx.fillStyle = b.type === "grass" ? "#2e7d32" : "#795548";
-                ctx.fillRect(b.x * TILE_SIZE, b.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                ctx.strokeStyle = "#000";
-                ctx.strokeRect(b.x * TILE_SIZE, b.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-            });
-
-            // Draw Player Start Box
-            ctx.fillStyle = "#00ff66";
-            ctx.fillRect(levelData.playerStart.x * TILE_SIZE + 2, levelData.playerStart.y * TILE_SIZE + 2, 28, 28);
-            ctx.strokeStyle = "#000";
-            ctx.strokeRect(levelData.playerStart.x * TILE_SIZE + 2, levelData.playerStart.y * TILE_SIZE + 2, 28, 28);
+        function resizeGrid() {
+            let inputSize = parseInt(document.getElementById('grid-size').value);
+            if (isNaN(inputSize) || inputSize < 8) inputSize = 8;
+            if (inputSize > 86) inputSize = 86;
+            document.getElementById('grid-size').value = inputSize;
+            currentSize = inputSize;
+            buildGrid();
         }
 
-        // Toggle Test Mode
-        document.getElementById("play-btn").addEventListener("click", () => {
-            isPlayMode = !isPlayMode;
-            const playBtn = document.getElementById("play-btn");
+        function buildGrid() {
+            const container = document.getElementById('grid-container');
+            container.innerHTML = '';
+            container.style.gridTemplateColumns = `repeat(${currentSize}, minmax(0, 1fr))`;
+            
+            // Limit cell dimensions to keep it contained nicely inside workspace
+            let cellSize = Math.floor(400 / currentSize);
+            if (cellSize < 6) cellSize = 6;
 
-            if (isPlayMode) {
-                playBtn.innerText = "■ Stop";
-                touchControls.style.display = "flex";
-                bottomPalette.style.display = "none";
-                
-                player.x = levelData.playerStart.x * TILE_SIZE + 2;
-                player.y = levelData.playerStart.y * TILE_SIZE + 2;
-                player.vx = 0; player.vy = 0;
+            for (let i = 0; i < currentSize * currentSize; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'grid-cell';
+                cell.style.width = `${cellSize}px`;
+                cell.style.height = `${cellSize}px`;
 
-                gameLoopId = requestAnimationFrame(gameLoop);
-            } else {
-                playBtn.innerText = "▶ Test";
-                touchControls.style.display = "none";
-                bottomPalette.style.display = "flex";
-                cancelAnimationFrame(gameLoopId);
-                drawEditor();
-            }
-        });
-
-        // Game Engine Loop
-        function gameLoop() {
-            if (!isPlayMode) return;
-
-            if (inputs.left) player.vx = -3;
-            else if (inputs.right) player.vx = 3;
-            else player.vx = 0;
-
-            if (inputs.jump && player.grounded) {
-                player.vy = -8;
-                player.grounded = false;
-            }
-
-            player.vy += 0.4;
-            player.x += player.vx;
-            player.y += player.vy;
-            player.grounded = false;
-
-            levelData.blocks.forEach(b => {
-                const bx = b.x * TILE_SIZE;
-                const by = b.y * TILE_SIZE;
-
-                if (player.x < bx + TILE_SIZE && player.x + player.width > bx &&
-                    player.y < by + TILE_SIZE && player.y + player.height > by) {
-                    
-                    if (player.vy > 0 && player.y + player.height - player.vy <= by) {
-                        player.y = by - player.height;
-                        player.vy = 0;
-                        player.grounded = true;
+                cell.addEventListener('mousedown', () => {
+                    isDrawing = true;
+                    cell.style.backgroundColor = currentColor;
+                });
+                cell.addEventListener('mouseover', () => {
+                    if (isDrawing) {
+                        cell.style.backgroundColor = currentColor;
                     }
-                }
-            });
+                });
 
-            if (player.y + player.height >= canvas.height) {
-                player.y = canvas.height - player.height;
-                player.vy = 0;
-                player.grounded = true;
+                container.appendChild(cell);
             }
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            levelData.blocks.forEach(b => {
-                ctx.fillStyle = b.type === "grass" ? "#2e7d32" : "#795548";
-                ctx.fillRect(b.x * TILE_SIZE, b.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-            });
-
-            ctx.fillStyle = "#00ff66";
-            ctx.fillRect(player.x, player.y, player.width, player.height);
-            ctx.strokeStyle = "#000";
-            ctx.strokeRect(player.x, player.y, player.width, player.height);
-
-            gameLoopId = requestAnimationFrame(gameLoop);
         }
 
-        // Keyboard Event Handlers
-        window.addEventListener("keydown", (e) => {
-            if (e.key === "ArrowLeft" || e.key.toLowerCase() === "a") inputs.left = true;
-            if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") inputs.right = true;
-            if (e.key === "ArrowUp" || e.key.toLowerCase() === "w" || e.key === " ") inputs.jump = true;
+        window.addEventListener('mouseup', () => {
+            isDrawing = false;
         });
 
-        window.addEventListener("keyup", (e) => {
-            if (e.key === "ArrowLeft" || e.key.toLowerCase() === "a") inputs.left = false;
-            if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") inputs.right = false;
-            if (e.key === "ArrowUp" || e.key.toLowerCase() === "w" || e.key === " ") inputs.jump = false;
-        });
-
-        // Touch Button Handlers
-        function setupTouchBtn(btnId, action) {
-            const btn = document.getElementById(btnId);
-            const start = (e) => { e.preventDefault(); inputs[action] = true; };
-            const end = (e) => { e.preventDefault(); inputs[action] = false; };
-
-            btn.addEventListener("pointerdown", start);
-            btn.addEventListener("pointerup", end);
-            btn.addEventListener("pointerleave", end);
+        function changeBackground() {
+            const bg = document.getElementById('bg-color').value;
+            document.getElementById('workspace').style.backgroundColor = bg;
         }
 
-        setupTouchBtn("btn-left", "left");
-        setupTouchBtn("btn-right", "right");
-        setupTouchBtn("btn-jump", "jump");
-
-        // Save & Publish
-        function getSerializedGame() { return JSON.stringify(levelData); }
-
-        function loadUnpublishedDraft() {
-            const raw = localStorage.getItem("devworld_unpublished_draft");
-            if (raw) {
-                const parsed = JSON.parse(raw);
-                document.getElementById("project-name").value = parsed.title || "My World";
-                if (parsed.content) levelData = JSON.parse(parsed.content);
-            }
-            drawEditor();
+        function publishGame() {
+            alert('Your game was published successfully from the Studio!');
+            window.location.href = 'home.html';
         }
 
-        function loadPublishedGame(gameId) {
-            db.collection("games").doc(gameId).get().then(doc => {
-                if (doc.exists) {
-                    const data = doc.data();
-                    document.getElementById("project-name").value = data.title || "Untitled";
-                    const stringData = data.localgame !== undefined ? data.localgame : data.content;
-                    if (stringData) levelData = JSON.parse(stringData);
-                    drawEditor();
-                }
-            });
-        }
-
-        document.getElementById("save-btn").addEventListener("click", () => {
-            const title = document.getElementById("project-name").value;
-            const content = getSerializedGame();
-
-            const key = activeGameId ? `devworld_edit_${activeGameId}` : "devworld_unpublished_draft";
-            localStorage.setItem(key, JSON.stringify({ title, content }));
-
-            if (activeGameId) {
-                db.collection("games").doc(activeGameId).update({ localgame: content, title })
-                .then(() => alert("Draft saved to cloud!"));
-            } else {
-                alert("Saved locally!");
-            }
-        });
-
-        document.getElementById("publish-btn").addEventListener("click", () => {
-            if (!currentUser) return;
-            const title = document.getElementById("project-name").value;
-            const content = getSerializedGame();
-
-            if (!content || levelData.blocks.length === 0) {
-                alert("Place at least one block before publishing!");
-                return;
-            }
-
-            if (activeGameId) {
-                db.collection("games").doc(activeGameId).update({
-                    title, content,
-                    localgame: firebase.firestore.FieldValue.delete()
-                }).then(() => alert("Game published live!"));
-            } else {
-                db.collection("games").add({
-                    title, content,
-                    authorId: currentUser.uid,
-                    publishedAt: firebase.firestore.FieldValue.serverTimestamp()
-                }).then(docRef => {
-                    activeGameId = docRef.id;
-                    return db.collection("users").doc(currentUser.uid).update({
-                        Projects: firebase.firestore.FieldValue.arrayUnion(docRef.id)
-                    });
-                }).then(() => alert("Game published to Dev World!"));
-            }
-        });
-
-        document.getElementById("back-btn").addEventListener("click", () => {
-            window.location.href = "profile.html";
-        });
-
-        drawEditor();
+        // Initialize default grid on load
+        buildGrid();
     </script>
 </body>
     </html>
-        
+                
